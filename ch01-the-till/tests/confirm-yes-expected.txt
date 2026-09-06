@@ -1,0 +1,4 @@
+65 97 121
+A is stored as the number 65
+Add 32 and you get a
+Print receipt? (y/n) Printing.

@@ -1,0 +1,51 @@
+# The style this book's code is written in, so that
+#
+#     $ clang-format --style=file -i somefile.c
+#
+# changes as little as possible. Chapter 1 Part 5 says style is
+# not worth arguing about and should be handed to a tool. That is only honest if
+# the tool agrees with the code, so this file makes it agree.
+#
+# None of the built-in styles fit. GNU comes closest on braces but puts a space
+# before every opening parenthesis, so it rewrites `line_total(2, 425)` as
+# `line_total (2, 425)`, which is not what the book prints.
+---
+Language: Cpp
+BasedOnStyle: LLVM
+
+# Four spaces, and braces on their own line, which is what every listing uses.
+IndentWidth: 4
+UseTab: Never
+BreakBeforeBraces: Allman
+
+# `if (x)` has a space. `printf(...)` does not.
+SpaceBeforeParens: ControlStatements
+
+# Do not reflow long lines. Several listings line their columns up on purpose,
+# and a column limit would break the receipt's alignment.
+ColumnLimit: 0
+
+# Chapter 1 breaks one long sum across three lines with the + at the start of
+# each continuation, and then explains that C ignores line breaks inside an
+# expression. Tell the formatter that is the house style, so it keeps the break
+# instead of joining the line and deleting the lesson.
+BreakBeforeBinaryOperators: All
+
+# Several files align trailing comments into a column by hand. 'Leave' keeps
+# whatever spacing is already there rather than collapsing it to one space.
+# This needs clang-format 16 or newer; Debian 13 ships 19.
+AlignTrailingComments:
+  Kind: Leave
+
+# A one-line if is a trap for beginners. Never let the formatter create one.
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortBlocksOnASingleLine: Never
+
+# The book writes `(double) a`, with a space, because a beginner reading
+# `(double)a` cannot see where the cast ends and the value begins.
+SpaceAfterCStyleCast: true
+
+PointerAlignment: Right
+SortIncludes: false

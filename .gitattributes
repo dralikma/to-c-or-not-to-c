@@ -1,0 +1,10 @@
+# Normalise line endings. Without this, a contributor on Windows can commit
+# CRLF into a shell script and it will stop running on Linux with an error
+# message that mentions nothing about line endings.
+* text=auto eol=lf
+
+*.c    text eol=lf
+*.h    text eol=lf
+*.sh   text eol=lf
+*.md   text eol=lf
+Makefile text eol=lf

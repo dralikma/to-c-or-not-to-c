@@ -1,0 +1,6 @@
+# Compiled programs do not belong in version control. They are large,
+# they change on every build, and anyone with the source can make them
+# again in a second.
+build/
+a.out
+*.o

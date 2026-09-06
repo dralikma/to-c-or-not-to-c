@@ -1,0 +1,2 @@
+The loss passes $1000 on day 250
+Trading days in a fortnight: 12

@@ -1,0 +1,4 @@
+Books say:      $21428.00
+Till took:      $21424.00
+Till took, raw: $21424.0000000001
+Short by:       $4.00

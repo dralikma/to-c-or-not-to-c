@@ -1,0 +1,34 @@
+# Licences
+
+This repository is under two licences, because it contains two different kinds
+of thing.
+
+## The text: CC BY-NC-SA 4.0
+
+Every `README.md` in this repository, meaning all the prose of the book, is
+licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+International Licence.
+
+In plain terms, you may:
+
+- **Share** it, copy it, and redistribute it in any medium or format
+- **Adapt** it, remix it, translate it, and build on it
+
+So long as you:
+
+- **Give credit.** Name the original and link back to this repository.
+- **Do not sell it.** Non-commercial use only.
+- **Share alike.** If you remix or build on it, release your version under this
+  same licence.
+
+Full legal text: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+Human-readable summary: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+## The code: MIT
+
+Every `.c` file, `Makefile`, and shell script in this repository is licensed
+under the MIT Licence, which is as permissive as licences get. Use it in
+anything, including commercial work. See `LICENSE-CODE` for the full text.
+
+The split is deliberate. The teaching is mine and I would like it to stay free.
+The code is yours to take anywhere.
