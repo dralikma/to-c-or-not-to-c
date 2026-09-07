@@ -1,0 +1,4 @@
+argc is 3
+argv[0] is ./build/greet
+argv[1] is David
+argv[2] is Malan

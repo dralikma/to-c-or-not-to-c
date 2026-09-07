@@ -2326,11 +2326,14 @@ $ clang-format --style=file -i receipt.c
 the `.clang-format` file at the top of this repository, which encodes the style
 every listing in this book uses.
 
-Run it, then run `git diff` and read what it decided. Most files it will leave
-alone. Where it disagrees with you, you have a choice to make once: change the
-code, or change `.clang-format`. Either is fine. What is not fine is having the
-argument again next week, which is the entire reason the settings live in a file
-a machine can read.
+Run it, then run `git diff`. **Nothing should change**, because every file in
+this repository is already in that style and a script checks it.
+
+That is the standard to hold yourself to. A style guide nobody can verify is a
+preference; one a machine can check is a decision you only have to make once.
+Where the tool ever does disagree with you, choose once: change the code, or
+change `.clang-format`. What is not worth doing is having the argument again next
+week.
 
 That file exists because none of the built-in styles fit. `--style=GNU` gets the
 braces right and then writes `line_total (2, 425)` with a space before the

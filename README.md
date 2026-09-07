@@ -225,8 +225,8 @@ sake: what is marked done is finished, tested, and safe to work through.
 | The Toolbench | **Done** | |
 | How the Machine Thinks | **Done** | no code, by design |
 | Chapter 1: The till that never balances | **Done** | programs and tests |
-| Chapter 2: Scrubbing the log | Writing | |
-| Chapter 3: Two million lines and a deadline | Planned | |
+| Chapter 2: Scrubbing the log | **Done** | programs and tests |
+| Chapter 3: Two million lines and a deadline | Writing | |
 | Chapter 4: The file that won't fit | Planned | |
 | Chapter 5: Counting unique things fast | Planned | |
 | Chapter 6: Ship it | Planned | |
@@ -348,6 +348,7 @@ Sample logs come with the repository, including some deliberately awful ones.
 ```
 to-c-or-not-to-c/
 ├── README.md                    you are here
+├── PUBLISHING.md                how to verify a chapter and push it
 ├── LICENSE                      how you may use the text and the code
 ├── toolbench/
 │   └── README.md                set up your machine
@@ -360,6 +361,10 @@ to-c-or-not-to-c/
 │   │   └── bugs/                the four planted bugs
 │   └── tests/                   expected output, and the test runner
 ├── ch02-scrubbing-the-log/
+│   ├── README.md                the chapter text
+│   ├── code/                    every program in the chapter
+│   ├── data/                    the sample access log
+│   └── tests/                   expected output, and the test runner
 ├── ch03-two-million-lines/
 ├── ch04-the-file-that-wont-fit/
 ├── ch05-counting-unique-things/
@@ -369,7 +374,7 @@ to-c-or-not-to-c/
     └── verify-on-debian.sh  checks the claims that need a real Debian box
 ```
 
-Chapters 2 to 6 currently hold a stub describing the scenario and what it
+Chapters 3 to 6 currently hold a stub describing the scenario and what it
 teaches. The directories fill out as each chapter is written.
 
 Get a copy:
@@ -457,7 +462,10 @@ The scope, sequence, and problem sets follow CS50x weeks 1 through 5 closely, so
 
 If something is unclear, wrong, or does not work on your machine, open an issue. Confusion is a bug in the book, not a bug in you, and knowing where readers snag is the only way this gets better.
 
-**If you are editing the book**, run the checker before you push:
+**If you are editing the book**, [`PUBLISHING.md`](PUBLISHING.md) is the whole
+routine on one page: the three commands, what each proves, the per-chapter
+checklist, and the git workflow. The short version is to run the checker before
+you push:
 
 ```
 $ python3 tools/check-book.py

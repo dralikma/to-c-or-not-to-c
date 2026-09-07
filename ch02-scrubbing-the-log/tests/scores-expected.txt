@@ -1,0 +1,4 @@
+Score 0 is 72
+Score 1 is 73
+Score 2 is 33
+Average: 59.333333

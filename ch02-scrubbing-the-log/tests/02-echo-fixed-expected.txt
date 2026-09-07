@@ -1,0 +1,12 @@
+192.168.4.11 - - [07/Sep/2026:08:14:22] "GET /menu HTTP/1.1" 200 4821
+192.168.4.11 - - [07/Sep/2026:08:15:03] "GET /orders?email=hana.k@example.com HTTP/1.1" 200 1204
+10.0.0.7 - - [07/Sep/2026:08:15:44] "GET /menu HTTP/1.1" 200 4821
+10.0.0.7 - - [07/Sep/2026:08:16:10] "GET /basket HTTP/1.1" 200 3310
+172.16.2.9 - - [07/Sep/2026:08:17:02] "POST /signup?email=t.oyelaran@mail.example HTTP/1.1" 302 0
+192.168.4.11 - - [07/Sep/2026:08:18:31] "GET /menu HTTP/1.1" 200 4821
+10.0.0.7 - - [07/Sep/2026:08:19:57] "GET /share?from=ines@example.org&to=jp.mbeki@example.net HTTP/1.1" 200 512
+172.16.2.9 - - [07/Sep/2026:08:20:14] "GET /menu HTTP/1.1" 200 4821
+203.0.113.5 - - [07/Sep/2026:08:21:40] "GET /basket HTTP/1.1" 200 3310
+10.0.0.7 - - [07/Sep/2026:08:22:03] "GET /unsubscribe?email=w.tanaka@example.com HTTP/1.1" 200 88
+203.0.113.5 - - [07/Sep/2026:08:23:19] "GET /menu HTTP/1.1" 200 4821
+192.168.4.11 - - [07/Sep/2026:08:24:55] "GET /basket HTTP/1.1" 200 3310

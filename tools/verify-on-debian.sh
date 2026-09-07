@@ -107,6 +107,46 @@ else
     echo "   gdb not installed, skipping."
 fi
 
+# ------------------------------------------- 3b. Chapter 2 gdb session
+hr
+echo "3b. THE CHAPTER 2 GDB WALKTHROUGH (Bug 3)"
+echo
+echo "   Chapter 2 breaks on redact_line and then on the left-walk loop."
+echo "   Compare the line numbers gdb reports against what the chapter says."
+echo
+
+cd "$WORK/code" 2>/dev/null || cd "$ROOT/ch02-scrubbing-the-log/code" || true
+if [ -d "$ROOT/ch02-scrubbing-the-log/code" ]; then
+    rm -rf "$WORK/ch2" && cp -r "$ROOT/ch02-scrubbing-the-log" "$WORK/ch2"
+    cd "$WORK/ch2/code" || exit 1
+    walk=$(grep -n "while (start > 0" bugs/bug3.c | cut -d: -f1)
+    echo "   bug3.c: redact_line starts at line $(grep -n '^void redact_line(char line\[\])$' bugs/bug3.c | tail -1 | cut -d: -f1)"
+    echo "   bug3.c: the left-walk loop is line $walk"
+    echo
+    if command -v gdb > /dev/null 2>&1; then
+        make build/bugs/bug3 > /dev/null 2>&1
+        echo "   --- real gdb output starts here ---"
+        gdb -q -batch \
+            -ex "break redact_line" \
+            -ex "break $walk" \
+            -ex "run < ../data/access.log" \
+            -ex "delete 1" \
+            -ex "continue" \
+            -ex "print i" \
+            -ex "print start" \
+            -ex "print line[start]" \
+            ./build/bugs/bug3 2>&1 | grep -vE "^\[|libthread" | head -18 | sed 's/^/   /'
+        echo "   --- ends here ---"
+        echo
+        echo "   The chapter claims gdb reports line 43 for redact_line, that the"
+        echo "   left-walk loop is line $walk, and that line[start] is 64 '@',"
+        echo "   which is the bug: start never moved off the @."
+    else
+        echo "   gdb not installed, skipping."
+    fi
+    cd "$WORK" || exit 1
+fi
+
 # ----------------------------------------- 4. Toolbench gdb sessions
 hr
 echo "4. THE TOOLBENCH GDB SECTIONS"
@@ -248,13 +288,13 @@ if command -v clang-format > /dev/null 2>&1; then
             echo "   would reformat: ${f#./}"
             clang-format --style=file "$f" | diff "$f" - | head -6 | sed 's/^/       /'
         fi
-    done < <(find ch01-the-till/code -name '*.c' | sort)
+    done < <(find ch0*/code -name '*.c' | sort)
     echo
     if [ "$disagree" -eq 0 ]; then
         echo "   all $total files already match .clang-format. Nothing to do."
     else
         echo "   $disagree of $total files disagree. Either run"
-        echo "     clang-format --style=file -i \$(find ch01-the-till/code -name '*.c')"
+        echo "     clang-format --style=file -i \$(find ch0*/code -name '*.c')"
         echo "   or adjust .clang-format until it matches what the book prints."
     fi
 else

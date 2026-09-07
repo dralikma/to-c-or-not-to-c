@@ -1,0 +1,3 @@
+strlen says 6
+last char is 10
+after stripping: strlen says 5

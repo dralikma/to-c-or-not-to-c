@@ -1,0 +1,3 @@
+as a string:  Hi!
+as numbers:   72 105 33 0
+as chars:     H i !

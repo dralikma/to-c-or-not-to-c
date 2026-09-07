@@ -1,0 +1,4 @@
+'a' is 97, 'A' is 65, apart by 32
+toupper('d') gives D
+'d' - 32 gives D
+isalpha('7') = 0   isdigit('7') = 1   isspace(' ') = 1

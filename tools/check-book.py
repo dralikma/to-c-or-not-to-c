@@ -98,12 +98,18 @@ check_true(f"all {working} internal links resolve", not broken, "; ".join(broken
 print("\nChapter text against the code it ships")
 
 chapter = read("ch01-the-till/README.md")
+chapter2 = read("ch02-scrubbing-the-log/README.md")
 receipt_src = read("ch01-the-till/code/receipt.c")
 
 listing = chapter[chapter.index("// receipt.c"):]
 listing = listing[:listing.index("```")].rstrip() + "\n"
-check_true("code/receipt.c is byte-identical to the chapter listing",
-           listing == receipt_src,
+check_true("ch1 code/receipt.c matches its chapter listing", listing == receipt_src,
+           "the listing and the file have drifted apart")
+
+l2 = chapter2[chapter2.index("// redact.c"):]
+l2 = l2[:l2.index("```")].rstrip() + "\n"
+check_true("ch2 code/redact.c matches its chapter listing",
+           l2 == read("ch02-scrubbing-the-log/code/redact.c"),
            "the listing and the file have drifted apart")
 
 # the gdb walkthrough breaks on a specific line, which shifts if the file changes
@@ -117,45 +123,95 @@ for form in [f"(gdb) break {actual}", f"file receipt.c, line {actual}.",
              f"main () at receipt.c:{actual}"]:
     check_true(f"gdb transcript uses line {actual}: {form!r}", form in chapter)
 
-# Every code listing printed in the chapter must be byte-identical to the file
+# Every code listing printed in a chapter must be byte-identical to the file
 # shipped beside it, or a reader following the book gets different line numbers
 # from a reader running the repository.
 for n in (1, 2, 4):
     head = chapter.index(f"### Bug {n}\n")
     blk = chapter.index("```c\n", head) + len("```c\n")
     listing = chapter[blk:chapter.index("```", blk)]
-    shipped = read(f"ch01-the-till/code/bugs/bug{n}.c")
-    check_true(f"code/bugs/bug{n}.c matches its chapter listing", listing == shipped,
+    check_true(f"ch1 code/bugs/bug{n}.c matches its chapter listing",
+               listing == read(f"ch01-the-till/code/bugs/bug{n}.c"),
                "a header comment or edit has shifted the line numbers apart")
 
-# A gdb session echoes the source line it stopped on, as "38<TAB>  subtotal...".
-# Each one is a claim about a specific file, and the file is named a line or two
-# earlier by "at receipt.c:38" or "file bug2.c, line 8.". Track which file is in
-# play and check every echo against it. Without this, adding one line anywhere
-# above a breakpoint silently invalidates the whole session.
-SOURCES = {
-    "receipt.c": "ch01-the-till/code/receipt.c",
-    "bug2.c":    "ch01-the-till/code/bugs/bug2.c",
-    "bug3.c":    "ch01-the-till/code/bugs/bug3.c",
-}
-current = None
-checked = 0
-wrong = []
-for raw in chapter.split("\n"):
-    named = re.search(r"(?:at |file )([a-z0-9-]+\.c)[:,]", raw)
-    if named:
-        current = named.group(1)
-    echo = re.match(r"^(\d+)\t(.+)$", raw)
-    if echo and current in SOURCES:
-        n, text = int(echo.group(1)), echo.group(2)
-        lines = read(SOURCES[current]).split("\n")
-        checked += 1
-        real = lines[n - 1].strip() if n <= len(lines) else "(past end of file)"
-        if real != text.strip():
-            wrong.append(f"{current}:{n} transcript says {text.strip()!r}, file has {real!r}")
-check_true(f"all {checked} source lines echoed in gdb transcripts are real",
-           not wrong, "; ".join(wrong))
+for n in (1, 2):
+    head = chapter2.index(f"### Bug {n}\n")
+    blk = chapter2.index("```c\n", head) + len("```c\n")
+    listing = chapter2[blk:chapter2.index("```", blk)]
+    check_true(f"ch2 code/bugs/bug{n}.c matches its chapter listing",
+               listing == read(f"ch02-scrubbing-the-log/code/bugs/bug{n}.c"),
+               "a header comment or edit has shifted the line numbers apart")
 
+# Every `break N` in a gdb transcript is a claim that line N of some file is
+# worth stopping on. Two ways that goes wrong, both of which have already
+# happened in this book: the line number drifts when something is inserted
+# above it, and the number points at a comment or a brace, which gdb silently
+# moves off. Check both, for every chapter.
+print()
+
+CHAPTER_SOURCES = {
+    "ch01-the-till/README.md": {
+        "receipt": "ch01-the-till/code/receipt.c",
+        "bug2":    "ch01-the-till/code/bugs/bug2.c",
+        "bug3":    "ch01-the-till/code/bugs/bug3.c",
+    },
+    "ch02-scrubbing-the-log/README.md": {
+        "redact": "ch02-scrubbing-the-log/code/redact.c",
+        "bug3":   "ch02-scrubbing-the-log/code/bugs/bug3.c",
+    },
+}
+
+def is_stoppable(line):
+    """Can gdb stop here? Not on a blank line, a comment, or a lone brace."""
+    t = line.strip()
+    return bool(t) and not t.startswith("//") and t not in ("{", "}")
+
+breaks_checked = 0
+break_problems = []
+echo_checked = 0
+echo_problems = []
+
+for chapter_file, sources in CHAPTER_SOURCES.items():
+    text = read(chapter_file)
+    current = None
+    for raw in text.split("\n"):
+        launch = re.search(r"\$ gdb \./([a-z0-9-]+)", raw)
+        if launch and launch.group(1) in sources:
+            current = sources[launch.group(1)]
+        named = re.search(r"(?:at |file )([a-z0-9-]+)\.c[:,]", raw)
+        if named and named.group(1) in sources:
+            current = sources[named.group(1)]
+        if current is None:
+            continue
+        lines = read(current).split("\n")
+
+        # Two shapes to check: what you typed, "(gdb) break 55", and what gdb
+        # reported back, "Breakpoint 1 at 0x...: file bug3.c, line 43."
+        brk = (re.match(r"^\(gdb\) break (\d+)", raw.strip())
+               or re.search(r"file [a-z0-9-]+\.c, line (\d+)\.", raw))
+        if brk:
+            n = int(brk.group(1))
+            breaks_checked += 1
+            if n > len(lines):
+                break_problems.append(f"{current}:{n} is past the end of the file")
+            elif not is_stoppable(lines[n - 1]):
+                break_problems.append(
+                    f"{current}:{n} is {lines[n-1].strip()!r}, which gdb cannot stop on")
+
+        # a transcript echoing "55\t    while (...)"
+        echo = re.match(r"^(\d+)\t(.+)$", raw)
+        if echo:
+            n, txt = int(echo.group(1)), echo.group(2)
+            echo_checked += 1
+            real = lines[n - 1].strip() if n <= len(lines) else "(past end of file)"
+            if real != txt.strip():
+                echo_problems.append(
+                    f"{current}:{n} transcript says {txt.strip()!r}, file has {real!r}")
+
+check_true(f"all {breaks_checked} gdb breakpoints land on a real, stoppable line",
+           not break_problems, "; ".join(break_problems))
+check_true(f"all {echo_checked} source lines echoed in gdb transcripts are real",
+           not echo_problems, "; ".join(echo_problems))
 
 # ---------------------------------------------------------------- counts
 print("\nNumeric claims in the prose")
@@ -231,6 +287,12 @@ check("tests that feed stdin", runner.count('"$HERE/inputs/'),
       claimed(tests_readme, r"(\w+) tests feed a file to the program"))
 
 
+# Chapter 2
+check("Chapter 2 parts", len(re.findall(r"^## Part \d+", chapter2, re.M)),
+      claimed(chapter2, r"^Same (\w+) parts as Chapter 1"))
+check("Chapter 2 planted bugs", len(re.findall(r"^### Bug \d+", chapter2, re.M)),
+      claimed(chapter2, r"(\w+) programs, one bug each"))
+
 # ------------------------------------------------------------- numbering
 print("\nSection numbering is contiguous")
 
@@ -241,6 +303,9 @@ for label, text, pat in [
     ("Chapter 1 parts", chapter, r"^## Part (\d+)"),
     ("Chapter 1 bugs", chapter, r"^### Bug (\d+)"),
     ("Chapter 1 exercises", chapter, r"^\*\*(\d+)\. "),
+    ("Chapter 2 parts", chapter2, r"^## Part (\d+)"),
+    ("Chapter 2 bugs", chapter2, r"^### Bug (\d+)"),
+    ("Chapter 2 exercises", chapter2, r"^\*\*(\d+)\. "),
 ]:
     nums = [int(n) for n in re.findall(pat, text, re.M)]
     check_true(f"{label} run 1..{len(nums)}",
@@ -266,18 +331,20 @@ check_true("every chapter directory has a README", not stubs, ", ".join(stubs))
 
 
 # ------------------------------------------------------------------ tests
-print("\nChapter 1 test suite")
+print("\nTest suites")
 
-code_dir = os.path.join(ROOT, "ch01-the-till", "code")
-if os.path.isdir(code_dir):
+for ch in ("ch01-the-till", "ch02-scrubbing-the-log"):
+    code_dir = os.path.join(ROOT, ch, "code")
+    if not os.path.isdir(code_dir):
+        continue
     r = subprocess.run(["make", "test"], cwd=code_dir,
                        capture_output=True, text=True)
     m = re.search(r"(\d+) passed, (\d+) failed", r.stdout)
     if m:
-        check_true(f"{m.group(1)} passed, {m.group(2)} failed",
+        check_true(f"{ch}: {m.group(1)} passed, {m.group(2)} failed",
                    m.group(2) == "0", "some tests fail")
     else:
-        check_true("test suite ran", False, "could not parse the output")
+        check_true(f"{ch}: test suite ran", False, "could not parse the output")
 
 
 # ----------------------------------------------------------------- verdict
