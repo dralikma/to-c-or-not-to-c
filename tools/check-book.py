@@ -337,6 +337,10 @@ for ch in ("ch01-the-till", "ch02-scrubbing-the-log"):
     code_dir = os.path.join(ROOT, ch, "code")
     if not os.path.isdir(code_dir):
         continue
+    # Build from scratch. A build/ directory copied in from somewhere else
+    # looks up to date to make, so the binaries never get rebuilt and the
+    # suite fails for reasons that have nothing to do with the code.
+    subprocess.run(["make", "clean"], cwd=code_dir, capture_output=True)
     r = subprocess.run(["make", "test"], cwd=code_dir,
                        capture_output=True, text=True)
     m = re.search(r"(\d+) passed, (\d+) failed", r.stdout)
