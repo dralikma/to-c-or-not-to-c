@@ -303,7 +303,6 @@ $ cd to-c-or-not-to-c
 ```
 to-c-or-not-to-c/
 ├── README.md                    you are here
-├── STYLE.md                     how this book is written, and why
 ├── LICENSE                      how you may use the text and the code
 ├── toolbench/
 │   └── README.md                set up your machine

@@ -8,3 +8,12 @@
 *.sh   text eol=lf
 *.md   text eol=lf
 Makefile text eol=lf
+
+# GitHub guesses a repository's language by counting code and ignoring prose,
+# which made this book show up as 47% C and 20% Python. The book is 315 KB of
+# writing and 70 KB of code. Mark the supporting code as documentation so the
+# language bar reflects what this actually is.
+tools/*        linguist-documentation
+*/code/**      linguist-documentation
+*/tests/**     linguist-documentation
+*.md           linguist-detectable

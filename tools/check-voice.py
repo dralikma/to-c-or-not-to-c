@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-check-voice.py - measure the prose against STYLE.md.
+check-voice.py - measure the prose against the house style.
 
     $ python3 tools/check-voice.py           report every file
     $ python3 tools/check-voice.py ch03      report one file
@@ -9,12 +9,55 @@ check-book.py checks facts. This one checks voice, and the difference matters:
 a fact is right or wrong, while voice is a rate you push in one direction.
 
 It cannot tell you whether a paragraph sounds like a person. Read it aloud for
-that. What it can do is catch the mechanical failures, which in the first draft
-of this book were nearly all of them: one contraction in 1,132 opportunities and
-not a single first-person sentence in 46,000 words.
+that. Exit status is 0 when every file is inside the thresholds, 1 otherwise,
+so it doubles as a worklist while a rewrite is in progress.
 
-Exit status is 0 when every file is inside the thresholds, 1 otherwise, so it
-doubles as a worklist while a rewrite is in progress.
+THE HOUSE STYLE, in full, because this is the only place it is written down.
+
+  One author, one voice, first page to last. Second person for the reader,
+  first person singular for an opinion or a war story. If a chapter runs 4,000
+  words without the author appearing, something is wrong.
+
+  Contractions throughout. Drop one only when a sentence needs weight: "Do not
+  put that in a test suite" hits harder than "don't". Rarely, or it stops
+  working.
+
+  Varied sentence length. Some paragraphs are one sentence.
+
+  Opinions, stated. If a default is bad, say so. a.out is a terrible name.
+  scanf is a trap. A reader can disagree with an opinion and can do nothing
+  with mush.
+
+  Admit difficulty. "Everyone gets this wrong the first time" beats
+  reassurance. When the author made the mistake, say so.
+
+  Let the reader fail on purpose. "Type this. Run it. It'll break. That's the
+  point."
+
+  Concrete, always. Not "a large file", forty thousand lines. Not "slow", four
+  hundred baskets a day at one cent each is $1,248 a year.
+
+  Never an em dash, and never its disguises: no spaced hyphen doing the same
+  job, no semicolon as a dramatic pause. Recast the sentence.
+
+  Banned constructions: "it's not X, it's Y"; colon-then-reveal as a habit;
+  three-item lists by default; opening a section by restating its heading;
+  closing one by summarising it; rhetorical questions as openers; "by the end
+  of this chapter you will be able to"; "let's dive in"; stacked hedges;
+  praising the reader; stock analogies (git is not save points, a pointer is
+  not a house address, a variable is not a box).
+
+  Bold is for a defined term on first use and for box labels. Not emphasis.
+
+  Four kinds of box and no others: Under the hood, Debian note, Trap, Parity.
+  No emoji anywhere.
+
+  An analogy earns its place only if it is specific to this book and does real
+  work. The phone book in How the Machine Thinks stays because Chapter 3
+  measures it. Most do not clear that bar.
+
+The test that matters: read the paragraph aloud. If it sounds like a
+conference abstract, a press release, or a product page, rewrite it.
 """
 
 import os
@@ -30,7 +73,6 @@ MIN_AUTHOR_PER_10K = 4         # first-person singular sentences per 10,000 word
 
 FILES = [
     "README.md",
-    "STYLE.md",
     "toolbench/README.md",
     "00-how-the-machine-thinks/README.md",
     "ch01-the-till/README.md",
@@ -130,9 +172,9 @@ def report(path):
 
     problems = []
     low = text.lower()
-    # STYLE.md lists the banned words in order to ban them, so it is exempt
-    # from its own vocabulary rules. Everything else is not.
-    defines_the_rules = path == "STYLE.md"
+    # Nothing is exempt any more. The rules live in this file's docstring,
+    # which is not prose the checker reads.
+    defines_the_rules = False
     for w in ([] if defines_the_rules else BANNED_WORDS):
         # Do not flag a banned word when it is part of a real identifier.
         # "build-essential" is a Debian package name, not a choice of adjective.
